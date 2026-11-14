@@ -1,0 +1,13 @@
+id,parent,child,share,right_kind,status,valid_from,valid_to,joint_agreement
+O0,E12,E0,0.7,voting,confirmed,2026-01-01,,
+O1,E12,E1,0.8,voting,confirmed,2026-01-01,2026-10-01,
+O2,E13,E2,0.6,voting,confirmed,2026-01-01,,
+O3,E13,E3,0.2,equity,confirmed,2026-01-01,,
+O4,E14,E4,0.5,joint,confirmed,2026-01-01,,J1
+O5,E15,E4,0.5,joint,confirmed,2026-01-01,,J1
+O6,E14,E15,0.2,equity,confirmed,2026-01-01,,
+O7,E15,E14,0.2,equity,confirmed,2026-01-01,,
+O8,E16,E5,0.55,voting,unconfirmed,2026-01-01,,
+O9,E16,E6,0.6,voting,unconfirmed,2026-01-01,,
+O10,E17,E7,0.7,voting,confirmed,2026-01-01,,
+O11,E12,E17,0.6,voting,confirmed,2026-01-01,,

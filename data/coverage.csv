@@ -1,0 +1,4 @@
+id,period,region,coverage_kind,known_amount,note
+C0,2026-09,片区0,registry,400000.00,登记系统内成交，非全社会交易
+C1,2026-09,片区1,registry,400000.00,登记系统内成交，非全社会交易
+C2,2026-09,片区2,unknown,,登记系统内成交，非全社会交易

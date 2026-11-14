@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "name": "text",
+      "entity_kind": "text"
+    },
+    "description": "登记主体身份已确认，无需做概率实体匹配。",
+    "references": {}
+  },
+  "ownership": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "parent": "text",
+      "child": "text",
+      "share": "number",
+      "right_kind": "text",
+      "status": "text",
+      "valid_from": "date",
+      "valid_to": "date?",
+      "joint_agreement": "text?"
+    },
+    "description": "voting 为表决权，equity 仅经济权益，joint 须按同协议结合理解；有效期左闭右开，未确认边仅为待核证据。",
+    "references": {
+      "parent": "entities.id",
+      "child": "entities.id"
+    }
+  },
+  "transactions": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "entity_id": "text",
+      "day": "date",
+      "species": "text",
+      "form": "text",
+      "region": "text",
+      "amount": "money",
+      "weight_kg": "number"
+    },
+    "description": "已完成成交，品类、鲜冻形态和销地共同描述候选市场边界。",
+    "references": {
+      "entity_id": "entities.id"
+    }
+  },
+  "coverage": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "period": "text",
+      "region": "text",
+      "coverage_kind": "text",
+      "known_amount": "money?",
+      "note": "text"
+    },
+    "description": "覆盖声明不等于可推算的全市场总额，unknown 代表缺少外部交易基准。",
+    "references": {}
+  }
+}
