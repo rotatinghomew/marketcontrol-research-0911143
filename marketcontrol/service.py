@@ -1,17 +1,66 @@
 import json
+from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
 from .cases import CaseStore
 from .catalog import Catalog
+from .concentration import concentration_report, control_report
 from .domain import overview
 from .profile import numeric_profiles
+
+
+def _validate_date(value, field):
+    if not isinstance(value, str):
+        raise ValueError(field + " 需为日期字符串")
+    try:
+        date.fromisoformat(value)
+    except ValueError as error:
+        raise ValueError(field + " 日期格式应为 YYYY-MM-DD") from error
+    return value
 
 
 class Application:
     def __init__(self, data, state):
         self.catalog = Catalog(data)
         self.cases = CaseStore(state)
+
+    def _control_request(self, body):
+        if not isinstance(body, dict):
+            raise ValueError("请求内容应为对象")
+        allowed = {"as_of", "include_unconfirmed", "joint_policy"}
+        unknown = set(body) - allowed
+        if unknown:
+            raise ValueError("请求包含未知字段：" + "、".join(sorted(unknown)))
+        if "as_of" in body:
+            _validate_date(body["as_of"], "as_of")
+        if "include_unconfirmed" in body and not isinstance(body["include_unconfirmed"], bool):
+            raise ValueError("include_unconfirmed 需为布尔值")
+        return control_report(
+            self.catalog,
+            body.get("as_of"),
+            bool(body.get("include_unconfirmed", False)),
+            body.get("joint_policy", "independent"),
+        )
+
+    def _concentration_request(self, body):
+        if not isinstance(body, dict):
+            raise ValueError("请求内容应为对象")
+        allowed = {"boundary", "scenario", "joint_operation"}
+        unknown = set(body) - allowed
+        if unknown:
+            raise ValueError("请求包含未知字段：" + "、".join(sorted(unknown)))
+        scenario = body.get("scenario")
+        if scenario is not None:
+            if not isinstance(scenario, dict):
+                raise ValueError("scenario 需为对象")
+            if "as_of" in scenario:
+                _validate_date(scenario["as_of"], "scenario.as_of")
+        return {
+            "source_fingerprint": self.catalog.fingerprint,
+            "report": concentration_report(
+                self.catalog, body.get("boundary"), scenario, body.get("joint_operation")),
+        }
 
     def dispatch(self, method, target, body=None):
         parsed = urlsplit(target)
@@ -44,6 +93,11 @@ class Application:
                 if set(body) - {"label", "options", "notes"}:
                     raise ValueError("请求包含未知字段")
                 return 201, self.cases.create(self.catalog, body.get("label"), body.get("options"), body.get("notes", ""))
+            if method == "POST" and path == "/research/control":
+                return 200, {"source_fingerprint": self.catalog.fingerprint,
+                             "control": self._control_request(body)}
+            if method == "POST" and path == "/research/concentration":
+                return 200, self._concentration_request(body)
         except KeyError:
             return 404, {"error": "记录不存在"}
         except (TypeError, ValueError) as error:
